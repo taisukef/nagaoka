@@ -1,0 +1,78 @@
+<!DOCTYPE html><html>
+<head>
+  <meta charset="utf-8">
+  <title>Nagaoka Population VR</title>
+  <meta property="og:title" content="Nagaoka Population VR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:image"  content="https://fukuno.jig.jp/app/webvr/utahlith/ss.png">
+  <meta name="twitter:image" content="https://fukuno.jig.jp/app/webvr/utahlith/ss.png">
+  <script src="https://aframe.io/releases/1.0.4/aframe.js"></script>
+  <!-- https://github.com/supermedium/aframe-environment-component -->
+  <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+  <!-- https://github.com/fernandojsg/aframe-teleport-controls -->
+  <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
+  <script type="module">
+    import { CSV } from "https://code4sabae.github.io/js/CSV.js";
+
+    const makeBox = (x, y, z, w, h, d) => {
+      const box = document.createElement("a-box");
+      box.setAttribute("position", { x, y, z });
+      box.setAttribute("width", w);
+      box.setAttribute("height", h);
+      box.setAttribute("depth", d);
+      scene.appendChild(box);
+      return box;
+    };
+    const makeText = (x, y, z, s) => {
+      const txt = document.createElement('a-text')
+      txt.setAttribute("position", { x, y, z });
+      txt.setAttribute('value', s);
+      // txt.setAttribute('scale', "1.2 1.2 1")
+      txt.setAttribute('rotation', "0 0 0");
+      txt.setAttribute('align', 'center');
+      //title.setAttribute('color', '#FFF')
+      scene.appendChild(txt);
+    };
+
+    window.onload = async () => {
+      makeText(-2.5, .3, -2.5, "age:0");
+      makeText(10 - 2.5, .3, -2.5, "age:100");
+
+      const url = "https://taisukef.github.io/nagaoka/csv/population.csv";
+      // const url = "csv/population.csv";
+      const csv = await CSV.fetch(url);
+      const json = CSV.toJSON(csv);
+      for (const d of json) {
+        if (d.month != 11)
+          continue;
+        //const ym = (parseInt(d.year) - 2018) * 12 + parseInt(d.month);
+        const ym = parseInt(d.year) - 2018;
+        const age = parseInt(d.age);
+        const pop = parseInt(d.male) + parseInt(d.female);
+        const z = ym / 10 - 3;
+        const x = age / 10 - 2.5;
+        const y = pop / 5000;
+        makeBox(x, y / 2, z, .05, y, .05);
+        makeText(-2.8, .8, z, d.year);
+      }
+    };
+  </script>
+</head>
+<body>
+
+<a-scene id="scene">
+  <a-entity light="type:directional; castShadow:true;" position="1 1 1"></a-entity>
+  <a-entity id="environment" environment="preset:starry" shadow="cast: true; receive: true;"></a-entity>
+  <!--<a-box color="#eee" shadow="cast:true; receive:true;" position="0 1.8 -2" depth="0.6" height="3.6" width="0.6"></a-box>
+  -->
+  <a-sphere id="moon" visible="true" color="#fff" radius="10" position="100 100 -70"></a-sphere>
+
+  <a-entity id="cameraRig">
+    <a-entity id="head" camera position="0 1 0" wasd-controls look-controls></a-entity>
+    <a-entity oculus-touch-controls="hand:left" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+    <a-entity oculus-touch-controls="hand:right" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+  </a-entity>
+</a-scene>
+
+</body>
+</html>

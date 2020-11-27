@@ -22,4 +22,4 @@ for (const fn of fns) {
   console.log(fn);
 }
 console.log(all);
-await Deno.writeTextFile("../data/population.csv", CSV.encode(all));
+await Deno.writeTextFile("../csv/population.csv", CSV.encode(all));
